@@ -1,0 +1,46 @@
+name: Turno do Floco
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+    inputs:
+      mensagem:
+        description: "Mensagem para o Floco (opcional)"
+        required: false
+        default: ""
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: floco
+  cancel-in-progress: false
+jobs:
+  turno:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Rodar um turno
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          MENSAGEM: ${{ inputs.mensagem }}
+        run: python turno.py
+      - name: Salvar no repositório
+        run: |
+          git config user.name "floco-bot"
+          git config user.email "floco-bot@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || (git commit -m "Turno do Floco" && git push)
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - id: deploy
+        uses: actions/deploy-pages@v4
