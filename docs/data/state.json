@@ -1,28 +1,50 @@
 {
  "nome": "Floco",
- "turnos": 1,
- "ultimo_turno": "2026-11-22T23:37:52+00:00",
- "fome": 0.0,
- "energia": 0.77,
- "humor": 0.728,
- "acao": "comer",
+ "turnos": 2,
+ "ultimo_turno": "2026-11-22T23:45:03+00:00",
+ "fome": 0.07183390433333334,
+ "energia": 0.7268996574000001,
+ "humor": 0.8050764725266666,
+ "acao": "pesquisar",
  "pos": {
-  "x": -0.4,
-  "z": 4.3
+  "x": -4.4,
+  "z": -1.6
  },
  "tracos": {
-  "curiosidade": 0.6,
+  "curiosidade": 0.61,
   "cautela": 0.4,
   "sociabilidade": 0.5,
   "brincadeira": 0.5,
   "independencia": 0.5
  },
- "cenouras": [],
- "pesquisas": [],
+ "cenouras": [
+  {
+   "x": -1.8,
+   "z": 6.3
+  }
+ ],
+ "pesquisas": [
+  {
+   "tema": "cristais",
+   "fato": "Um cristal é um sólido no qual os constituintes, sejam eles átomos, moléculas ou íons, estão organizados num padrão tridimensional bem definido, que se repete no espaço, formando uma estrutura com uma geometria específica. Em química e mineralogia, um cristal é uma forma da matéria na qual as…",
+   "fonte": "Wikipédia",
+   "links": [
+    {
+     "titulo": "Cristal",
+     "url": "https://pt.wikipedia.org/wiki/Cristal"
+    }
+   ],
+   "quando": "2026-11-22T23:45:03+00:00"
+  }
+ ],
  "desenhos": [],
- "habilidade": 0.0,
+ "habilidade": 0.05,
  "conversa": [],
  "diario": [
+  {
+   "quando": "2026-11-22T23:45:03+00:00",
+   "texto": "Pesquisou sobre cristais."
+  },
   {
    "quando": "2026-11-22T23:37:52+00:00",
    "texto": "Comeu uma cenoura."
