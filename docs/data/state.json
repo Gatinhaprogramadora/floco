@@ -1,0 +1,35 @@
+{
+ "nome": "Floco",
+ "turnos": 1,
+ "ultimo_turno": "2026-11-22T23:37:52+00:00",
+ "fome": 0.0,
+ "energia": 0.77,
+ "humor": 0.728,
+ "acao": "comer",
+ "pos": {
+  "x": -0.4,
+  "z": 4.3
+ },
+ "tracos": {
+  "curiosidade": 0.6,
+  "cautela": 0.4,
+  "sociabilidade": 0.5,
+  "brincadeira": 0.5,
+  "independencia": 0.5
+ },
+ "cenouras": [],
+ "pesquisas": [],
+ "desenhos": [],
+ "habilidade": 0.0,
+ "conversa": [],
+ "diario": [
+  {
+   "quando": "2026-11-22T23:37:52+00:00",
+   "texto": "Comeu uma cenoura."
+  },
+  {
+   "quando": "2026-11-22T23:37:52+00:00",
+   "texto": "Floco acordou no terreno."
+  }
+ ]
+}

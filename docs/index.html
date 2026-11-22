@@ -1,0 +1,195 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Coelho Floco</title>
+<style>
+:root{--bg:#cfe6ee;--fg:#243024;--card:rgba(255,252,240,.92);--bar:#d9d2bd;--acc:#e08a2c}
+@media (prefers-color-scheme:dark){:root{--bg:#1b2330;--fg:#e8efe2;--card:rgba(24,30,38,.92);--bar:#3a4452;--acc:#f0a050}}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font:13px/1.35 ui-rounded,"Trebuchet MS",system-ui,sans-serif;overflow:hidden}
+#app{position:relative;height:100%}
+canvas{display:block;width:100%;height:100%}
+.card{position:absolute;background:var(--card);border-radius:14px;padding:10px 12px}
+#hud{top:calc(10px + env(safe-area-inset-top,0px));left:10px;width:176px}
+#hud h1{font-size:15px;margin:0 0 2px}
+#st{opacity:.85;margin-bottom:6px}
+.r{display:flex;align-items:center;gap:6px;margin:3px 0;font-size:12px}
+.r span{width:66px}
+.bar{flex:1;height:6px;background:var(--bar);border-radius:3px;overflow:hidden}
+.bar b{display:block;height:100%;background:var(--acc)}
+#tabs{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:10px;display:flex;flex-direction:column;gap:6px}
+button{font:inherit;border:0;border-radius:12px;padding:8px 10px;background:var(--card);color:var(--fg);cursor:pointer}
+#chat{left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+#fala{min-height:34px;margin-bottom:6px}
+#fala div{margin:1px 0}
+#ff{font-size:15px}
+#ff small{font-size:11px;opacity:.7}
+#linha{display:flex;gap:6px}
+#msg{flex:1;min-width:0;font:inherit;font-size:16px;padding:8px 10px;border-radius:10px;border:1px solid var(--bar);background:transparent;color:var(--fg)}
+#env{background:var(--acc);color:#fff}
+#panel{left:10px;right:10px;top:calc(64px + env(safe-area-inset-top,0px));bottom:calc(112px + env(safe-area-inset-bottom,0px));display:none;overflow:auto;z-index:5}
+#panel h2{margin:0 0 8px;font-size:15px}
+#panel p{margin:5px 0}
+#panel small{opacity:.65}
+#panel a{color:inherit}
+#panel input{font:inherit;font-size:16px;width:100%;box-sizing:border-box;padding:8px;border-radius:10px;border:1px solid var(--bar);background:transparent;color:var(--fg);margin:6px 0}
+#panel .x{float:right;background:var(--bar);padding:4px 8px}
+#panel .g{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+#panel .g div{font-size:11px;text-align:center}
+#panel .g img{width:100%;border-radius:6px;display:block;background:#fdf8e4}
+#bub{position:absolute;pointer-events:none;font-size:30px;transform:translate(-50%,-100%);display:none;text-shadow:0 1px 4px #0006}
+</style></head><body>
+<div id="app"><canvas id="cv"></canvas><div id="bub"></div>
+<div class="card" id="hud"><h1>🐰 Floco</h1><div id="st">Carregando…</div><div id="bars"></div></div>
+<div id="tabs"><button data-p="p">💻 Pesquisas</button><button data-p="d">🖼️ Desenhos</button><button data-p="j">📖 Diário</button><button data-p="c">💬 Conversa</button></div>
+<div class="card" id="panel"></div>
+<div class="card" id="chat"><div id="fala"><div id="fv"></div><div id="ff"></div></div>
+<div id="linha"><input id="msg" maxlength="300" placeholder="Fale com o Floco…" autocomplete="off"><button id="env">Enviar</button></div></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const app=document.getElementById("app"),cv=document.getElementById("cv");
+let seed=7;const rd=(a,b)=>{seed=(seed*16807)%2147483647;return a+(seed/2147483647)*(b-a)};
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xbfe3f2);scene.fog=new THREE.Fog(0xbfe3f2,22,55);
+const cam=new THREE.PerspectiveCamera(55,1,.1,100);
+scene.add(new THREE.HemisphereLight(0xffffff,0x7a9a5a,.95));
+const sun=new THREE.DirectionalLight(0xfff2d0,.7);sun.position.set(6,10,5);scene.add(sun);
+const M=c=>new THREE.MeshStandardMaterial({color:c,flatShading:true,roughness:1});
+const gh=(x,z)=>{const d=Math.min(1,Math.hypot(x,z)/14);return Math.sin(x*.35)*Math.cos(z*.3)*.7*d*d};
+const gg=new THREE.PlaneGeometry(70,70,32,32);gg.rotateX(-Math.PI/2);
+const pp=gg.attributes.position;for(let i=0;i<pp.count;i++)pp.setY(i,gh(pp.getX(i),pp.getZ(i)));gg.computeVertexNormals();
+scene.add(new THREE.Mesh(gg,M(0x8cc05a)));
+function add(g,m,x,z,y=0){const o=new THREE.Mesh(g,m);o.position.set(x,gh(x,z)+y,z);scene.add(o);return o}
+for(let i=0;i<26;i++){const a=rd(0,6.28),r=rd(11,28),x=Math.cos(a)*r,z=Math.sin(a)*r,h=rd(1.5,3);
+add(new THREE.CylinderGeometry(.18,.25,h,5),M(0x7a5a3a),x,z,h/2);add(new THREE.ConeGeometry(1.1,h*1.4,6),M(i%3?0x4f9a4a:0x6aae52),x,z,h+.6)}
+for(let i=0;i<10;i++){const a=rd(0,6.28),r=rd(7,20);add(new THREE.IcosahedronGeometry(rd(.3,.7),0),M(0x9a9a9a),Math.cos(a)*r,Math.sin(a)*r,.2)}
+const desk=new THREE.Group();desk.position.set(-5,gh(-5,-3),-3);desk.rotation.y=.6;scene.add(desk);
+const dk=(g,m,x,y,z)=>{const o=new THREE.Mesh(g,m);o.position.set(x,y,z);desk.add(o)};
+dk(new THREE.BoxGeometry(1.8,.1,1),M(0x8a6a44),0,.75,0);
+[[-.8,-.4],[.8,-.4],[-.8,.4],[.8,.4]].forEach(p=>dk(new THREE.BoxGeometry(.1,.75,.1),M(0x6a4a2a),p[0],.37,p[1]));
+dk(new THREE.BoxGeometry(1,.65,.06),M(0x333a44),0,1.2,-.2);
+dk(new THREE.BoxGeometry(.9,.55,.02),new THREE.MeshBasicMaterial({color:0x6ab8ff}),0,1.2,-.16);
+const bc=document.createElement("canvas");bc.width=512;bc.height=320;const tex=new THREE.CanvasTexture(bc);
+const board=new THREE.Group();board.position.set(5.5,gh(5.5,-4),-4);board.rotation.y=-.6;scene.add(board);
+[-1.5,1.5].forEach(x=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,2.2,5),M(0x6a4a2a));o.position.set(x,1.1,0);board.add(o)});
+const bp=new THREE.Mesh(new THREE.PlaneGeometry(3.4,2.12),new THREE.MeshBasicMaterial({map:tex}));bp.position.set(0,2,.08);board.add(bp);
+/* coelho */
+const hog=new THREE.Group(),body=new THREE.Group(),ears=[];hog.add(body);scene.add(hog);
+const part=(g,m,x,y,z,s)=>{const o=new THREE.Mesh(g,m);o.position.set(x,y,z);if(s)o.scale.set(...s);body.add(o);return o};
+part(new THREE.SphereGeometry(.5,10,8),M(0xd9cbb8),0,.5,0,[1,.9,1.25]);
+part(new THREE.SphereGeometry(.3,10,8),M(0xeee4d4),0,.65,.62,[1,.95,1.05]);
+part(new THREE.SphereGeometry(.06,6,6),M(0xf08a9a),0,.62,.92);
+[-.13,.13].forEach(x=>part(new THREE.SphereGeometry(.05,6,6),M(0x111111),x,.74,.82));
+[[-.28,.35],[.28,.35],[-.28,-.35],[.28,-.35]].forEach(p=>part(new THREE.SphereGeometry(.13,6,6),M(0xcbbba6),p[0],.1,p[1]));
+[-.13,.13].forEach(x=>{const e=part(new THREE.SphereGeometry(.1,8,6),M(0xeee4d4),x,1.2,.55,[1,3.4,.6]);e.rotation.z=x>0?-.15:.15;ears.push(e)});
+part(new THREE.SphereGeometry(.17,8,6),M(0xffffff),0,.6,-.68);
+/* sinais do coelho */
+const SIG={pular:{e:"🐇",t:"pulou",d:.9},pulo_duplo:{e:"✨",t:"pulou de alegria",d:1.4},girar:{e:"🌀",t:"girou, empolgado",d:1.1},
+balancar:{e:"🎵",t:"balançou, brincalhão",d:1.3},orelhas_em_pe:{e:"👂",t:"orelhas em pé (atento)",d:1.2},orelhas_baixas:{e:"😟",t:"orelhas baixas (triste ou com medo)",d:1.4},
+deitar:{e:"💤",t:"deitou (sono)",d:1.8},cheirar:{e:"👃",t:"farejou (pensando)",d:1.2},bater_pata:{e:"❗",t:"bateu a pata (bravo ou alerta)",d:1.1},
+negar:{e:"🚫",t:"balançou a cabeça (não)",d:1.1},assentir:{e:"👍",t:"acenou com a cabeça (sim)",d:1.0},coracao:{e:"❤️",t:"carinho",d:1.2},
+interrogacao:{e:"❓",t:"não entendeu",d:1.2},cenoura:{e:"🥕",t:"quer cenoura",d:1.2},lapis:{e:"✏️",t:"quer desenhar",d:1.2},computador:{e:"💻",t:"quer pesquisar",d:1.2}};
+/* estado */
+let S=null,tgt={x:0,z:0},cens=[],imgs={},queue=[],sg=null,lastId=null,esperando=0,poll=null;
+const AC={comer:"comendo",descansar:"descansando",explorar:"explorando",pesquisar:"pesquisando no computador",desenhar:"desenhando",brincar:"brincando",socializar:"dizendo oi",conversar:"conversando com você",acordou:"acordando"};
+const bars=document.getElementById("bars"),B={};
+[["Fome","fome"],["Energia","energia"],["Humor","humor"],["Desenho","habilidade"],["Curiosid.","curiosidade"],["Cautela","cautela"],["Sociabil.","sociabilidade"],["Brincad.","brincadeira"],["Independ.","independencia"]].forEach(([n,k])=>{
+const r=document.createElement("div");r.className="r";r.innerHTML="<span></span><div class='bar'><b></b></div>";r.firstChild.textContent=n;bars.appendChild(r);B[k]=r.querySelector("b")});
+function hud(){["fome","energia","humor"].forEach(k=>B[k].style.width=S[k]*100+"%");B.habilidade.style.width=(S.habilidade||0)*100+"%";
+Object.keys(S.tracos).forEach(k=>B[k].style.width=S.tracos[k]*100+"%");
+const m=Math.max(0,Math.round((Date.now()-Date.parse(S.ultimo_turno))/60000));
+document.getElementById("st").textContent="Turno "+S.turnos+" · há "+m+" min: "+(AC[S.acao]||S.acao)}
+function carrot(x,z){const o=new THREE.Group(),c=new THREE.Mesh(new THREE.ConeGeometry(.12,.5,6),M(0xf08a24)),l=new THREE.Mesh(new THREE.ConeGeometry(.09,.24,4),M(0x4fa83a));
+c.rotation.x=Math.PI;c.position.y=.3;l.position.y=.67;o.add(c,l);o.position.set(x,gh(x,z),z);scene.add(o);return o}
+function redraw(){const g=bc.getContext("2d");g.fillStyle="#c49a66";g.fillRect(0,0,512,320);g.strokeStyle="#6b4a2b";g.lineWidth=16;g.strokeRect(0,0,512,320);
+const top=[...(S?S.desenhos:[])].sort((a,b)=>b.nota-a.nota).slice(0,5),rot=[-.05,.04,-.03,.05,-.04];
+if(!top.length){g.fillStyle="#fff8";g.font="28px sans-serif";g.textAlign="center";g.fillText("Quadro vazio",256,170)}
+top.forEach((d,i)=>{const cx=i<3?92+i*164:174+(i-3)*164,cy=i<3?95:243,im=imgs[d.arquivo];g.save();g.translate(cx,cy);g.rotate(rot[i]);g.fillStyle="#fff";g.fillRect(-74,-72,148,144);
+if(im&&im.complete&&im.naturalWidth)g.drawImage(im,-68,-66,136,132);g.restore()});tex.needsUpdate=true}
+const fala=(v,f,sm)=>{document.getElementById("fv").textContent=v||"";const e=document.getElementById("ff");e.textContent=f||"";if(sm){const s=document.createElement("small");s.textContent=" "+sm;e.appendChild(s)}};
+const emo=c=>c.sinais.map(n=>(SIG[n]||{e:"?"}).e).join(" "),sig2=c=>"("+c.sinais.map(n=>(SIG[n]||{t:n}).t).join("; ")+")";
+async function carregar(first){
+try{const r=await fetch("data/state.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw 0;S=await r.json()}
+catch(e){document.getElementById("st").textContent="O Floco ainda não nasceu. Rode o workflow no GitHub (veja o README).";return}
+tgt={x:S.pos.x,z:S.pos.z};if(first)hog.position.set(tgt.x,0,tgt.z);
+cens.forEach(c=>scene.remove(c));cens=S.cenouras.map(c=>carrot(c.x,c.z));
+S.desenhos.forEach(d=>{if(!imgs[d.arquivo]){const i=new Image();i.onload=redraw;i.src=d.arquivo;imgs[d.arquivo]=i}});
+const cv_=S.conversa||[];
+if(lastId===null){lastId=cv_.length?cv_[0].id:0;if(cv_.length)fala("Você: "+cv_[0].voce,"Floco: "+emo(cv_[0]),sig2(cv_[0]))}
+else{const novos=cv_.filter(x=>x.id>lastId).reverse();if(novos.length){lastId=cv_[0].id;esperando=0;novos.forEach(x=>{x.sinais.forEach(n=>queue.push(n));fala("Você: "+x.voce,"Floco: "+emo(x),sig2(x))})}}
+redraw();hud();if(pn.style.display==="block"&&pn.dataset.k!=="t")abrir(pn.dataset.k,true)}
+/* painéis */
+const pn=document.getElementById("panel");
+const fmt=q=>new Date(q).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+function abrir(k,forcar){if(!S&&k!=="t")return;if(!forcar&&pn.dataset.k===k&&pn.style.display==="block"){pn.style.display="none";return}
+pn.dataset.k=k;pn.style.display="block";pn.innerHTML="";
+const x=document.createElement("button");x.textContent="Fechar ✕";x.className="x";x.onclick=()=>pn.style.display="none";pn.appendChild(x);
+const h=document.createElement("h2");pn.appendChild(h);
+const linha=(t,s,ls)=>{const p=document.createElement("p");p.textContent=t;if(s){const m=document.createElement("small");m.textContent=" · "+s;p.appendChild(m)}
+(ls||[]).forEach(l=>{if(/^https?:\/\//.test(l.url)){const a=document.createElement("a");a.href=l.url;a.textContent=" 🔗 "+(l.titulo||"fonte").slice(0,40);a.target="_blank";a.rel="noopener noreferrer";p.appendChild(a)}});pn.appendChild(p)};
+if(k==="p"){h.textContent="💻 O que ele pesquisou";if(!S.pesquisas.length)linha("Ainda nada.");S.pesquisas.forEach(r=>linha(r.tema+": "+r.fato,fmt(r.quando)+" · "+r.fonte,r.links))}
+else if(k==="j"){h.textContent="📖 Diário";S.diario.forEach(d=>linha(d.texto,fmt(d.quando)))}
+else if(k==="c"){h.textContent="💬 Conversa";if(!(S.conversa||[]).length)linha("Ainda não conversaram. Escreva algo lá embaixo.");(S.conversa||[]).forEach(c=>linha("Você: "+c.voce+"  →  Floco: "+emo(c)+" "+sig2(c),fmt(c.quando)))}
+else if(k==="t"){h.textContent="🔑 Chave para conversar";
+linha("Para o Floco receber suas mensagens, a página precisa de uma chave (token) do GitHub que só mexe neste repositório, só em Actions. Ela fica guardada só neste aparelho.");
+linha("1) Abra o link abaixo. 2) Nome: floco. Em Repository access escolha Only select repositories e marque o floco. 3) Em Permissions → Repository permissions → Actions: Read and write. 4) Generate token, copie e cole aqui.");
+const a=document.createElement("a");a.href="https://github.com/settings/personal-access-tokens/new";a.target="_blank";a.rel="noopener noreferrer";a.textContent="👉 Criar token no GitHub";pn.appendChild(a);
+const i=document.createElement("input");i.type="password";i.placeholder="Cole o token aqui";i.autocomplete="off";pn.appendChild(i);
+const b=document.createElement("button");b.textContent="Salvar chave";b.onclick=()=>{try{localStorage.setItem("floco_token",i.value.trim())}catch(e){}pn.style.display="none";fala("Chave salva.","Agora é só escrever e enviar.")};pn.appendChild(b)}
+else{h.textContent="🖼️ Desenhos (⭐ = top 5 do mural, ✨ = elaborado)";const g=document.createElement("div");g.className="g";
+if(!S.desenhos.length)linha("Ainda nenhum desenho.");
+[...S.desenhos].sort((a,b)=>b.nota-a.nota).forEach((d,i)=>{const c=document.createElement("div"),im=document.createElement("img"),t=document.createElement("div");im.src=d.arquivo;im.alt=d.nome;t.textContent=(i<5?"⭐ ":"")+(d.tipo==="complexo"?"✨ ":"")+d.nome+" · "+d.nota;c.append(im,t);g.appendChild(c)});pn.appendChild(g)}}
+document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>abrir(b.dataset.p));
+/* conversa */
+const inp=document.getElementById("msg");
+const tk=()=>{try{return localStorage.getItem("floco_token")||""}catch(e){return ""}};
+function repo(){if(location.hostname.endsWith(".github.io"))return location.hostname.split(".")[0]+"/"+location.pathname.split("/")[1];
+let r="";try{r=localStorage.getItem("floco_repo")||""}catch(e){}if(!r){r=prompt("Qual o seu usuário/repositório no GitHub? Ex.: maria/floco")||"";try{localStorage.setItem("floco_repo",r)}catch(e){}}return r}
+async function enviar(){const t=inp.value.trim().slice(0,300);if(!t)return;
+if(!tk()){abrir("t");return}
+const r=repo();if(!/^[\w.-]+\/[\w.-]+$/.test(r)){fala("Não achei o repositório.","");return}
+inp.value="";fala("Você: "+t,"💭");esperando=Date.now();queue.push("orelhas_em_pe");
+try{const resp=await fetch("https://api.github.com/repos/"+r+"/actions/workflows/turno.yml/dispatches",{method:"POST",
+headers:{Authorization:"Bearer "+tk(),Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"},body:JSON.stringify({ref:"main",inputs:{mensagem:t}})});
+if(resp.status!==204){esperando=0;const m={401:"Chave inválida.",403:"A chave não tem permissão (Actions: Read and write).",404:"Repositório ou workflow não encontrado.",422:"O workflow não aceitou (confira se é o turno.yml e se a branch é main)."};
+fala("Você: "+t,"⚠️ "+(m[resp.status]||"Erro "+resp.status));return}
+fala("Você: "+t,"💭","(o Floco responde em 1 a 2 minutos)");
+clearInterval(poll);poll=setInterval(()=>{if(!esperando||Date.now()-esperando>240000){clearInterval(poll);if(esperando){esperando=0;fala("Você: "+t,"😶","(sem resposta; tente de novo)")}return}carregar(false)},8000)}
+catch(e){esperando=0;fala("Você: "+t,"⚠️ Sem conexão com o GitHub.")}}
+document.getElementById("env").onclick=enviar;inp.addEventListener("keydown",e=>{if(e.key==="Enter")enviar()});
+/* loop */
+function resize(){const w=app.clientWidth,h=app.clientHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+new ResizeObserver(resize).observe(app);resize();
+const clock=new THREE.Clock(),lk=new THREE.Vector3(),cp=new THREE.Vector3(),pv=new THREE.Vector3(),bub=document.getElementById("bub");let tt=0;
+function turn(a,dt){let d=a-hog.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));hog.rotation.y+=d*Math.min(1,dt*8)}
+function tick(){requestAnimationFrame(tick);const dt=Math.min(.05,clock.getDelta());tt+=dt;
+let mov=false,hop=0,sq=1,spin=0,shake=0,nod=0,earUp=0,lie=0,wig=0,sniff=0,stomp=0;
+if(S){const dx=tgt.x-hog.position.x,dz=tgt.z-hog.position.z,d=Math.hypot(dx,dz),a=S.acao;
+if(d>.25){mov=true;turn(Math.atan2(dx,dz),dt);const s=Math.min(d,2.4*dt);hog.position.x+=dx/d*s;hog.position.z+=dz/d*s}
+else if(a==="pesquisar"||a==="desenhar")turn(Math.atan2(-5-hog.position.x,-3-hog.position.z),dt);
+else if(a==="brincar")hop=Math.abs(Math.sin(tt*7))*.5;
+else if(a==="socializar")hog.rotation.y+=Math.sin(tt*12)*.03;
+else if(a==="descansar")sq=.85+Math.sin(tt*2)*.03}
+if(!sg&&!mov&&queue.length){const n=queue.shift();sg={n,t0:tt,d:(SIG[n]||{d:1}).d}}
+if(sg){const p=(tt-sg.t0)/sg.d;if(p>=1)sg=null;else switch(sg.n){
+case"pular":hop+=Math.sin(p*Math.PI)*.7;break;
+case"pulo_duplo":hop+=Math.abs(Math.sin(p*Math.PI*2))*.7;break;
+case"girar":spin=p*Math.PI*2;hop+=Math.sin(p*Math.PI)*.3;break;
+case"balancar":wig=Math.sin(p*Math.PI*8)*.25;break;
+case"orelhas_em_pe":earUp=Math.sin(Math.min(1,p*2)*Math.PI/2);break;
+case"orelhas_baixas":earUp=-Math.sin(Math.min(1,p*2)*Math.PI/2);break;
+case"deitar":lie=Math.sin(Math.min(1,p*3)*Math.PI/2)*(p>.8?(1-p)/.2:1);break;
+case"cheirar":sniff=Math.sin(p*Math.PI*14);break;
+case"bater_pata":stomp=Math.abs(Math.sin(p*Math.PI*4));break;
+case"negar":shake=Math.sin(p*Math.PI*6)*.6;break;
+case"assentir":nod=Math.sin(p*Math.PI*4)*.25;break;
+default:hop+=Math.sin(p*Math.PI)*.25}}
+hog.position.y=gh(hog.position.x,hog.position.z)+hop+(mov?Math.abs(Math.sin(tt*11))*.06:0);
+body.rotation.z=(mov?Math.sin(tt*11)*.06:0)+wig;body.rotation.y=spin+shake;body.rotation.x=nod-stomp*.12;
+body.scale.y=sq*(1-lie*.3);body.scale.z=1+sniff*.03;
+ears.forEach(e=>{e.scale.y=3.4*(1+Math.max(0,earUp)*.3+Math.min(0,earUp)*.25);e.rotation.x=Math.max(0,-earUp)*1.1});
+lk.set(hog.position.x,hog.position.y+.5,hog.position.z);cp.set(hog.position.x*.8,5.5,hog.position.z+8.5);cam.position.lerp(cp,dt*1.5);cam.lookAt(lk);
+renderer.render(scene,cam);
+const em=sg?(SIG[sg.n]||{}).e:(esperando?"💭":"");
+if(em){pv.set(hog.position.x,hog.position.y+1.9,hog.position.z).project(cam);bub.style.display="block";bub.textContent=em;bub.style.left=(pv.x*.5+.5)*app.clientWidth+"px";bub.style.top=(-pv.y*.5+.5)*app.clientHeight+"px"}else bub.style.display="none"}
+carregar(true);setInterval(()=>carregar(false),60000);setInterval(()=>{if(S)hud()},20000);tick();
+</script></body></html>
