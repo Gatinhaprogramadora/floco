@@ -1,14 +1,14 @@
 {
  "nome": "Floco",
- "turnos": 2,
- "ultimo_turno": "2026-11-22T23:45:03+00:00",
- "fome": 0.07183390433333334,
- "energia": 0.7268996574000001,
- "humor": 0.8050764725266666,
- "acao": "pesquisar",
+ "turnos": 3,
+ "ultimo_turno": "2026-11-23T04:05:09+00:00",
+ "fome": 0.0,
+ "energia": 0.4868996574000001,
+ "humor": 0.75761470879,
+ "acao": "comer",
  "pos": {
-  "x": -4.4,
-  "z": -1.6
+  "x": -1.8,
+  "z": 6.3
  },
  "tracos": {
   "curiosidade": 0.61,
@@ -19,8 +19,8 @@
  },
  "cenouras": [
   {
-   "x": -1.8,
-   "z": 6.3
+   "x": 4.1,
+   "z": -6.4
   }
  ],
  "pesquisas": [
@@ -41,6 +41,10 @@
  "habilidade": 0.05,
  "conversa": [],
  "diario": [
+  {
+   "quando": "2026-11-23T04:05:09+00:00",
+   "texto": "Comeu uma cenoura."
+  },
   {
    "quando": "2026-11-22T23:45:03+00:00",
    "texto": "Pesquisou sobre cristais."
