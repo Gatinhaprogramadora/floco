@@ -1,14 +1,14 @@
 {
  "nome": "Floco",
- "turnos": 6,
- "ultimo_turno": "2026-11-24T11:54:38+00:00",
- "fome": 0.7000000000000001,
- "energia": 0.7668996574000001,
- "humor": 0.51951299866625,
- "acao": "descansar",
+ "turnos": 7,
+ "ultimo_turno": "2026-11-24T21:57:43+00:00",
+ "fome": 0.5,
+ "energia": 0.5268996574000001,
+ "humor": 0.488791447943125,
+ "acao": "comer",
  "pos": {
-  "x": -0.8,
-  "z": 2.3
+  "x": -2.7,
+  "z": 0.8
  },
  "tracos": {
   "curiosidade": 0.61,
@@ -49,6 +49,10 @@
  "habilidade": 0.05,
  "conversa": [],
  "diario": [
+  {
+   "quando": "2026-11-24T21:57:43+00:00",
+   "texto": "Comeu uma cenoura."
+  },
   {
    "quando": "2026-11-24T11:54:38+00:00",
    "texto": "Tirou uma soneca."
